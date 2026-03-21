@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    # Use quotes because of : and ? in the URL
+    url: "jdbc:mysql://127.0.0.1:3306/mydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+    username: root
+    password: Root123
+  jpa:
+    hibernate:
+      ddl-auto: update    # Automatically creates/updates tables based on entities
+    show-sql: true        # Shows SQL statements in the console
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+logging:
+  level:
+    root: INFO
+    com.example.user_service: DEBUG
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger
