@@ -60,7 +60,7 @@ public class UserController {
     // Create a new user
     @Operation(summary = "Create a new user")
     @PostMapping("/save")
-    public ResponseEntity<Void> createUser(@RequestBody List<User> userList) {
+    public ResponseEntity<?> createUser(@RequestBody List<User> userList) {
 
         logger.info("Received request to save {} users", userList.size());
 

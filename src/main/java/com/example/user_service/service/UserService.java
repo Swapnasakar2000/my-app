@@ -9,7 +9,7 @@ public interface UserService {
 
     List<UserDTO> getAllUsers();
 
-    Void createUser(List<User> userEntity);
+    void createUser(List<User> userEntity);
 
     void deleteAllUsers();
 
