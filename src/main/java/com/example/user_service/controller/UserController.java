@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -29,16 +30,37 @@ public class UserController {
         this.userService = userService;
     }
 
-        @GetMapping("/fetch/id")
-        public ResponseEntity<UserDTO> hello(@RequestParam Integer id) {
-        UserDTO userDTO = userService.fetchIndividualUser(Integer.valueOf(id));
-            return ResponseEntity.status(HttpStatus.OK).body(userDTO);
+    @GetMapping("/fetch/id")
+    public ResponseEntity<Object> hello(@RequestParam Integer id) {
+        try {
+            UserDTO userDTO = userService.fetchIndividualUser(id);
+            return ResponseEntity.ok(userDTO);
+        } catch (RuntimeException ex) {
+            // Handle circuit breaker open
+            if (ex.getMessage().contains("CircuitBreaker")) {
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+                        Map.of(
+                                "status", "error",
+                                "message", ex.getMessage(),
+                                "data", null
+                        )
+                );
+            }
+            // Other exceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of(
+                            "status", "error",
+                            "message", ex.getMessage(),
+                            "data", null
+                    )
+            );
         }
+    }
 
     // Create a new user
     @Operation(summary = "Create a new user")
     @PostMapping("/save")
-    public ResponseEntity<Void> createUser(@RequestBody List<User> userList) {
+    public ResponseEntity<?> createUser(@RequestBody List<User> userList) {
 
         logger.info("Received request to save {} users", userList.size());
 

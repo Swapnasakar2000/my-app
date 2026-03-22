@@ -22,3 +22,44 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+  retry:
+    instances:
+      userService:
+        maxAttempts: 3
+        waitDuration: 2s
+        retryExceptions:
+          - java.lang.RuntimeException    # Retry only on these exceptions
+        ignoreExceptions:
+            - com.example.user_service.exception.ResourceNotFoundException
+  ratelimiter:
+    instances:
+      userService:
+        limitForPeriod: 5
+        limitRefreshPeriod: 1s
+        timeoutDuration: 500ms
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  metrics:
+    enable:
+      all: true
+
+#redis:
+#  host: localhost
+#  port: 6379
+#  password: # optional
+#  cache:
+#    type: redis
