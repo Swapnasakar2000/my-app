@@ -29,6 +29,12 @@ public class UserController {
         this.userService = userService;
     }
 
+        @GetMapping("/fetch/id")
+        public ResponseEntity<UserDTO> hello(@RequestParam Integer id) {
+        UserDTO userDTO = userService.fetchIndividualUser(Integer.valueOf(id));
+            return ResponseEntity.status(HttpStatus.OK).body(userDTO);
+        }
+
     // Create a new user
     @Operation(summary = "Create a new user")
     @PostMapping("/save")

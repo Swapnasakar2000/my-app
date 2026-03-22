@@ -12,4 +12,6 @@ public interface UserService {
     Void createUser(List<User> userEntity);
 
     void deleteAllUsers();
+
+    UserDTO fetchIndividualUser(Integer id);
 }
