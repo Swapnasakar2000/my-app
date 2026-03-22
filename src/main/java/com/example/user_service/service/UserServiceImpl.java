@@ -5,6 +5,10 @@ import com.example.user_service.entity.User;
 import com.example.user_service.exception.ResourceNotFoundException;
 import com.example.user_service.repository.UserRepository;
 import com.example.user_service.service.UserService;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final String USER_SERVICE = "userService";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -46,6 +52,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CircuitBreaker(name = USER_SERVICE,fallbackMethod = "fetchUserFallback")
+    @Retry(name = USER_SERVICE)
+    @RateLimiter(name = USER_SERVICE)
     public UserDTO fetchIndividualUser(Integer id) throws ResourceNotFoundException {
 
         // jpql way which direct connects to entity table not database table
@@ -68,8 +77,17 @@ public class UserServiceImpl implements UserService {
             */
 
         return mapToDTO(user);
+//        throw new RuntimeException("Simulated failure");
     }
 
+    // Fallback method for circuit breaker
+    public UserDTO fetchUserFallback(Integer id, Throwable ex) {
+        if (ex instanceof CallNotPermittedException) {
+            System.out.println("Circuit breaker is OPEN!");
+            // Optional: throw custom exception or return a special response
+        }
+        return new UserDTO(-1, "Fallback User", "fallback@example.com");
+    }
     // 🔁 Mapping Methods
     private UserDTO mapToDTO(User user) {
         UserDTO dto = new UserDTO();
